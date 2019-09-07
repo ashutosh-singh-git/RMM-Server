@@ -74,6 +74,16 @@ class ApiServiceImplementation implements ApiService {
                         .map(v -> createResult(v, company.get()))
                         .collect(Collectors.toList());
             }
+        } else {
+            List<Manager> managerList = managerRepository.findByNameRegex(".*" + managerName + ".*");
+            if (managerList.size() > 0) {
+                return managerList.stream()
+                        .map(v -> {
+                            Optional<Company> company = companyRepository.findById(v.getCompanyId());
+                            return company.map(company1 -> createResult(v, company1)).orElse(null);
+                        })
+                        .collect(Collectors.toList());
+            }
         }
         return null;
     }
@@ -133,7 +143,7 @@ class ApiServiceImplementation implements ApiService {
                 .build();
 
         Review review = reviewRepository.findFirstByManagerId(searchResult.getId());
-        if(review != null){
+        if (review != null) {
             PromotedReview promotedReview = PromotedReview.builder()
                     .rating(review.getOverallRating())
                     .reviewer(review.getName())

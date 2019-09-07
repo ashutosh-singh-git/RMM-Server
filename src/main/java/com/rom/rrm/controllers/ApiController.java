@@ -1,5 +1,6 @@
 package com.rom.rrm.controllers;
 
+import com.rom.rrm.annotations.ReCaptchaValidation;
 import com.rom.rrm.document.Company;
 import com.rom.rrm.document.Manager;
 import com.rom.rrm.document.Review;
@@ -46,6 +47,7 @@ public class ApiController {
     }
 
     @PostMapping("/manager")
+    @ReCaptchaValidation
     public Manager addManager(@RequestBody NewManager managerMono) {
         return apiService.addManagerOfCompany(managerMono);
     }
@@ -61,8 +63,9 @@ public class ApiController {
     }
 
     @PostMapping("/review")
-    public Review addReview(@RequestBody @Valid Review reviewMono) {
-        return apiService.addReviewForManager(reviewMono);
+    @ReCaptchaValidation
+    public Review addReview(@RequestBody @Valid Review review) {
+        return apiService.addReviewForManager(review);
     }
 
 }

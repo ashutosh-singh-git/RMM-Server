@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 @Document
 @Getter
 @Setter
-@CompoundIndex(def = "{'managerId':1, 'name':1, 'overallRating':1, 'isRecommended':1, 'fingerprint':1}", name = "c_i_reviews_i", unique = true)
+@CompoundIndex(def = "{'managerId':1, 'name':1, 'fingerprint':1}", name = "c_i_review", unique = true)
 public class Review extends BaseEntity {
     @Id
     private String id;
