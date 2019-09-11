@@ -24,7 +24,6 @@ public class Review extends BaseEntity {
     private String name;
     @NotNull
     private @Valid Feedback feedback;
-    @Min(1)
     private int overallRating;
     @NotNull
     private Boolean isRecommended;

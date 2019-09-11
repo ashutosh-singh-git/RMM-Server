@@ -1,16 +1,19 @@
 package com.rom.rrm.service;
 
 import com.rom.rrm.document.Company;
+import com.rom.rrm.document.Feedback;
 import com.rom.rrm.document.Manager;
 import com.rom.rrm.document.Review;
 import com.rom.rrm.dto.NewManager;
 import com.rom.rrm.dto.PromotedReview;
 import com.rom.rrm.dto.ReviewResult;
 import com.rom.rrm.dto.SearchResult;
+import com.rom.rrm.exception.ApplicationException;
 import com.rom.rrm.repository.CompanyRepository;
 import com.rom.rrm.repository.ManagerRepository;
 import com.rom.rrm.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -182,14 +185,26 @@ class ApiServiceImplementation implements ApiService {
 
     @Override
     public Review addReviewForManager(Review review) {
-        Review reviewMono = reviewRepository.save(review);
+
         Optional<Manager> optionalManager = managerRepository.findById(review.getManagerId());
         if (optionalManager.isPresent()) {
+            review.setOverallRating(calculateOverallRating(review.getFeedback()));
+            Review reviewMono = reviewRepository.save(review);
             Manager manager = optionalManager.get();
             manager.setTotalReviews(manager.getTotalReviews() + 1);
             manager.setTotalRatings(manager.getTotalRatings() + review.getOverallRating());
             managerRepository.save(manager);
+            return reviewMono;
+        } else {
+            throw new ApplicationException("Manager not Found!", HttpStatus.BAD_REQUEST);
         }
-        return reviewMono;
+    }
+
+
+    private int calculateOverallRating(Feedback feedback) {
+        int totalReviews = feedback.getBehaviour() + feedback.getCommunication() + feedback.getLeadership()
+                + feedback.getKnowledge() + feedback.getSkills() + feedback.getTransparency();
+
+        return Math.floorDiv(totalReviews,6);
     }
 }

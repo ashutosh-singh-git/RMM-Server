@@ -15,6 +15,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleException(DuplicateKeyException e) {
         return new ResponseEntity<>(new ApiError("Duplicate Submission", e.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ApplicationException.class)
+    public ResponseEntity<ApiError> handleException(ApplicationException e) {
+        return new ResponseEntity<>(new ApiError(e.getMessage(), ""), e.getStatusCode());
+    }
+
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<ApiError> handleException(HttpClientErrorException e) {
         return new ResponseEntity<>(new ApiError(e.getStatusText(), e.getMessage()), e.getStatusCode());
