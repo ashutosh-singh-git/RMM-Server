@@ -52,16 +52,6 @@ public class ApiController {
         return apiService.addManagerOfCompany(managerMono);
     }
 
-    @GetMapping("/manager")
-    public List<Manager> fetchManager(@RequestParam String managerName, @RequestParam(required = false) String companyId) {
-        return apiService.searchManagerByName(managerName, companyId);
-    }
-
-    @GetMapping("/review")
-    public List<Review> reviewSearch(@RequestParam String managerId) {
-        return apiService.searchReviewForManager(managerId);
-    }
-
     @PostMapping("/review")
     @ReCaptchaValidation
     public Review addReview(@RequestBody @Valid Review review) {

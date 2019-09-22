@@ -12,11 +12,13 @@ import com.rom.rrm.exception.ApplicationException;
 import com.rom.rrm.repository.CompanyRepository;
 import com.rom.rrm.repository.ManagerRepository;
 import com.rom.rrm.repository.ReviewRepository;
+import com.rom.rrm.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,7 +34,7 @@ class ApiServiceImplementation implements ApiService {
 
     @Override
     public List<Company> searchCompanyByLocation(String city) {
-        return companyRepository.findByCity(city);
+        return null;
     }
 
     @Override
@@ -43,21 +45,6 @@ class ApiServiceImplementation implements ApiService {
     @Override
     public List<Company> fetchAllCompanies() {
         return companyRepository.findAll();
-    }
-
-    @Override
-    public Company addCompany(Company company) {
-        return companyRepository.insert(company);
-    }
-
-    @Override
-    public List<Manager> searchManagerByName(String managerName, String companyId) {
-        return managerRepository.findByNameRegexAndCompanyId(".*" + managerName + ".*", companyId);
-    }
-
-    @Override
-    public List<Manager> searchManagerByCompany(String companyId) {
-        return managerRepository.findByCompanyId(companyId);
     }
 
     @Override
@@ -85,6 +72,7 @@ class ApiServiceImplementation implements ApiService {
                             Optional<Company> company = companyRepository.findById(v.getCompanyId());
                             return company.map(company1 -> createResult(v, company1)).orElse(null);
                         })
+                        .filter(Objects::nonNull)
                         .collect(Collectors.toList());
             }
         }
@@ -112,7 +100,7 @@ class ApiServiceImplementation implements ApiService {
             int averageRating = mg.getTotalReviews() > 0 ? Math.floorDiv(mg.getTotalRatings(), mg.getTotalReviews()) : mg.getTotalRatings();
             return ReviewResult
                     .builder()
-                    .city(company.getCity())
+                    .city(mg.getCity())
                     .managerName(mg.getName())
                     .id(mg.getId())
                     .averageRating(averageRating)
@@ -134,7 +122,7 @@ class ApiServiceImplementation implements ApiService {
         int averageRating = manager.getTotalReviews() > 0 ? Math.floorDiv(manager.getTotalRatings(), manager.getTotalReviews()) : manager.getTotalRatings();
         SearchResult searchResult = SearchResult.builder()
                 .companyId(company.getId())
-                .city(company.getCity())
+                .city(manager.getCity())
                 .companyName(company.getName())
                 .id(manager.getId())
                 .designation(manager.getDesignation())
@@ -161,26 +149,32 @@ class ApiServiceImplementation implements ApiService {
     @Override
     public Manager addManagerOfCompany(NewManager newManager) {
         String companyId = newManager.getCompanyId();
+        String city = AppUtil.toTitleCase(newManager.getCity());
         Manager manager = new Manager();
         manager.setGender(newManager.getGender());
         manager.setDesignation(newManager.getDesignation());
-        manager.setName(newManager.getManagerName());
+        manager.setName(AppUtil.toTitleCase(newManager.getManagerName()));
+        manager.setCity(city);
         if (companyId != null && !companyId.isBlank()) {
-            manager.setCompanyId(companyId);
-            return managerRepository.save(manager);
+            Optional<Company> companyOptional = companyRepository.findById(companyId);
+            if (companyOptional.isPresent()) {
+                Company company = companyOptional.get();
+                if (!company.getCities().contains(city)) {
+                    company.addCity(city);
+                    companyRepository.save(company);
+                }
+                manager.setCompanyId(companyId);
+                return managerRepository.save(manager);
+            }
+            return null;
         } else {
             Company company = new Company();
-            company.setCity(newManager.getCity());
-            company.setName(newManager.getCompanyName());
+            company.addCity(city);
+            company.setName(AppUtil.toTitleCase(newManager.getCompanyName()));
             Company newCompany = companyRepository.save(company);
             manager.setCompanyId(newCompany.getId());
             return managerRepository.save(manager);
         }
-    }
-
-    @Override
-    public List<Review> searchReviewForManager(String managerId) {
-        return reviewRepository.findByManagerId(managerId);
     }
 
     @Override
@@ -205,6 +199,6 @@ class ApiServiceImplementation implements ApiService {
         int totalReviews = feedback.getBehaviour() + feedback.getCommunication() + feedback.getLeadership()
                 + feedback.getKnowledge() + feedback.getSkills() + feedback.getTransparency();
 
-        return Math.floorDiv(totalReviews,6);
+        return Math.floorDiv(totalReviews, 6);
     }
 }

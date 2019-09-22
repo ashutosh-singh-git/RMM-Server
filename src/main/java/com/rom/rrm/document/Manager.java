@@ -12,12 +12,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 @Getter
 @Setter
-@CompoundIndex(def = "{'name':1, 'companyId':1, 'designation':1}", name = "c_i_manager", unique = true)
+@CompoundIndex(def = "{'name':1, 'companyId':1, 'designation':1, 'city':1}", name = "c_i_manager", unique = true)
 public class Manager extends BaseEntity {
 
     @Id
     private String id;
     private String companyId;
+    private String city;
     @TextIndexed
     private String name;
     private Gender gender;

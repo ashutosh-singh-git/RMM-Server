@@ -7,6 +7,11 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Getter
 @Setter
 @Document
@@ -17,5 +22,14 @@ public class Company extends BaseEntity {
     private String id;
     @Indexed
     private String name;
-    private String city;
+    private Set<String> cities;
+
+    public void addCity(String city) {
+        if(cities != null){
+            this.cities.add(city);
+        }else {
+            this.cities = new HashSet<>();
+            this.cities.add(city);
+        }
+    }
 }

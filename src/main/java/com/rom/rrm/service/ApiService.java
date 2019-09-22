@@ -15,13 +15,8 @@ public interface ApiService {
     List<Company> searchCompanyByLocation(String locationId);
     Company findCompanyById(String id);
     List<Company> fetchAllCompanies();
-    Company addCompany(Company company);
-    List<Manager> searchManagerByName(String managerName, String companyId);
-    List<Manager> searchManagerByCompany(String companyId);
     List<SearchResult> searchManager(String companyId, String managerName);
     ReviewResult searchReview(String managerId);
     Manager addManagerOfCompany(NewManager manager);
-
-    List<Review> searchReviewForManager(String managerId);
     Review addReviewForManager(Review review);
 }
